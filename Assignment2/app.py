@@ -20,33 +20,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Check if models exist
-if not os.path.exists('models/logistic_regression.pkl'):
-    st.info("Training models for the first time... This may take a few minutes.")
-    
-    # Create models directory if it doesn't exist
-    os.makedirs('models', exist_ok=True)
-    
-    try:
-        result = subprocess.run(['python', 'src/model_training.py'], 
-                              capture_output=True, 
-                              text=True)
-        
-        if result.returncode == 0:
-            st.success("✅ Models trained successfully!")
-            st.info("Please click the button below to load the application.")
-            if st.button("🔄 Refresh Application", type="primary"):
-                st.rerun()
-            st.stop()
-        else:
-            st.error("❌ Training failed!")
-            with st.expander("View Error Details"):
-                st.code(result.stderr)
-            st.stop()
-            
-    except Exception as e:
-        st.error(f"Error during training: {str(e)}")
-        st.stop()
+# Models should already exist in the repo - no training needed on Streamlit Cloud
 
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
