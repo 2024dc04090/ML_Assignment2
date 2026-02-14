@@ -29,7 +29,31 @@ required_model_files = [
     'metrics.csv'
 ]
 
-models_exist = all(os.path.exists(os.path.join(models_dir, f)) for f in required_model_files)
+# Get absolute paths
+base_dir = os.path.dirname(os.path.abspath(__file__))
+models_full_path = os.path.join(base_dir, models_dir)
+
+# Check which files exist
+existing_files = []
+missing_files = []
+for f in required_model_files:
+    file_path = os.path.join(models_full_path, f)
+    if os.path.exists(file_path):
+        existing_files.append(f)
+    else:
+        missing_files.append(f)
+
+models_exist = len(missing_files) == 0
+
+# Debug info in sidebar (collapsible)
+with st.sidebar:
+    with st.expander("🔍 Debug Info"):
+        st.write(f"**Base directory:** `{base_dir}`")
+        st.write(f"**Models directory:** `{models_full_path}`")
+        st.write(f"**Models exist:** {models_exist}")
+        st.write(f"**Existing files ({len(existing_files)}):** {', '.join(existing_files) if existing_files else 'None'}")
+        if missing_files:
+            st.write(f"**Missing files ({len(missing_files)}):** {', '.join(missing_files)}")
 
 if not models_exist:
     st.info("🔧 Training models for the first time... This may take a few minutes.")
