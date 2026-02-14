@@ -1,26 +1,98 @@
 import os
+import sys
 import subprocess
 import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+# Page configuration - MUST BE FIRST STREAMLIT COMMAND
+st.set_page_config(
+    page_title="ML Assignment 2",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Check if models exist
+models_dir = 'models'
+required_model_files = [
+    'logistic_regression.pkl',
+    'decision_tree.pkl', 
+    'knn.pkl',
+    'naive_bayes.pkl',
+    'random_forest.pkl',
+    'xgboost_model.pkl',
+    'scaler.pkl',
+    'feature_names.pkl',
+    'metrics.csv'
+]
+
+models_exist = all(os.path.exists(os.path.join(models_dir, f)) for f in required_model_files)
+
+if not models_exist:
+    st.info("🔧 Training models for the first time... This may take a few minutes.")
+    
+    # Create models directory if it doesn't exist
+    os.makedirs(models_dir, exist_ok=True)
+    
+    try:
+        # First run data preprocessing
+        st.info("Step 1/2: Running data preprocessing...")
+        preprocess_result = subprocess.run(
+            [sys.executable, 'src/data_preprocessing.py'],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        
+        if preprocess_result.returncode != 0:
+            st.error("❌ Data preprocessing failed!")
+            with st.expander("View Error Details"):
+                st.code(preprocess_result.stderr)
+                st.code(preprocess_result.stdout)
+            st.stop()
+        
+        st.success("✅ Data preprocessing completed!")
+        
+        # Then run model training
+        st.info("Step 2/2: Training models...")
+        training_result = subprocess.run(
+            [sys.executable, 'src/model_training.py'],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        
+        if training_result.returncode == 0:
+            st.success("✅ Models trained successfully!")
+            st.info("Please click the button below to load the application.")
+            if st.button("🔄 Refresh Application", type="primary"):
+                st.rerun()
+            st.stop()
+        else:
+            st.error("❌ Model training failed!")
+            with st.expander("View Error Details"):
+                st.code(training_result.stderr)
+                st.code(training_result.stdout)
+            st.stop()
+            
+    except Exception as e:
+        st.error(f"❌ Error during setup: {str(e)}")
+        import traceback
+        with st.expander("View Full Error"):
+            st.code(traceback.format_exc())
+        st.stop()
+
+# Import after models are confirmed to exist
 from src.utils import load_models, preprocess_uploaded_data, predict_with_model, calculate_metrics
 from styles import get_custom_css, COLORS, CHART_COLORS
 from constants import (APP_CONFIG, MODEL_DESCRIPTIONS, METRIC_INFO, METRICS_TO_HIGHLIGHT,METRIC_FORMAT, CHART_CONFIG, 
                        ANALYSIS_TEXT, UI_MESSAGES,TEST_DATA_REQUIREMENTS, FILE_UPLOAD_INFO, AUC_THRESHOLDS, 
                        TAB_NAMES, SECTION_HEADERS, PREDICTION_LABELS)
+
 import warnings
 warnings.filterwarnings('ignore')
-
-# Page configuration - MUST BE FIRST STREAMLIT COMMAND
-st.set_page_config(
-    page_title=APP_CONFIG['title'],
-    layout=APP_CONFIG['layout'],
-    initial_sidebar_state="collapsed"
-)
-
-# Models should already exist in the repo - no training needed on Streamlit Cloud
 
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
