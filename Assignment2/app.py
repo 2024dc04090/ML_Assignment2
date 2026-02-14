@@ -37,18 +37,27 @@ if not models_exist:
     os.makedirs(models_dir, exist_ok=True)
     
     try:
+        # Determine correct base path
+        # If app.py is in Assignment2 folder, we're already in the right place
+        # If we're in the repo root, we need to go into Assignment2
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        
         # First run data preprocessing
         st.info("Step 1/2: Running data preprocessing...")
+        preprocess_script = os.path.join(base_dir, 'src', 'data_preprocessing.py')
+        
         preprocess_result = subprocess.run(
-            [sys.executable, 'src/data_preprocessing.py'],
+            [sys.executable, preprocess_script],
             capture_output=True,
             text=True,
-            cwd=os.getcwd()
+            cwd=base_dir
         )
         
         if preprocess_result.returncode != 0:
             st.error("❌ Data preprocessing failed!")
             with st.expander("View Error Details"):
+                st.code(f"Script path attempted: {preprocess_script}")
+                st.code(f"Working directory: {base_dir}")
                 st.code(preprocess_result.stderr)
                 st.code(preprocess_result.stdout)
             st.stop()
@@ -57,11 +66,13 @@ if not models_exist:
         
         # Then run model training
         st.info("Step 2/2: Training models...")
+        training_script = os.path.join(base_dir, 'src', 'model_training.py')
+        
         training_result = subprocess.run(
-            [sys.executable, 'src/model_training.py'],
+            [sys.executable, training_script],
             capture_output=True,
             text=True,
-            cwd=os.getcwd()
+            cwd=base_dir
         )
         
         if training_result.returncode == 0:
