@@ -2,10 +2,6 @@ import os
 import sys
 import subprocess
 import streamlit as st
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Page configuration - MUST BE FIRST STREAMLIT COMMAND
 st.set_page_config(
@@ -13,6 +9,11 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Check if models exist
 models_dir = 'models'
@@ -77,9 +78,23 @@ if not models_exist:
         
         if training_result.returncode == 0:
             st.success("✅ Models trained successfully!")
-            st.info("Please click the button below to load the application.")
-            if st.button("🔄 Refresh Application", type="primary"):
-                st.rerun()
+            st.balloons()
+            st.info("🔄 The application will reload automatically in 3 seconds...")
+            
+            # Use HTML meta refresh to reload the page
+            st.markdown("""
+                <meta http-equiv="refresh" content="3">
+                <script>
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
+                </script>
+            """, unsafe_allow_html=True)
+            
+            # Also provide manual button as backup
+            if st.button("🔄 Refresh Application Now", type="primary", key="manual_refresh"):
+                st.markdown('<meta http-equiv="refresh" content="0">', unsafe_allow_html=True)
+            
             st.stop()
         else:
             st.error("❌ Model training failed!")
