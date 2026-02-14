@@ -15,18 +15,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Check if models exist
+# Check if models exist - using all_models.pkl
 models_dir = 'models'
 required_model_files = [
-    'logistic_regression.pkl',
-    'decision_tree.pkl', 
-    'knn.pkl',
-    'naive_bayes.pkl',
-    'random_forest.pkl',
-    'xgboost_model.pkl',
-    'scaler.pkl',
-    'feature_names.pkl',
-    'metrics.csv'
+    'all_models.pkl'  # Single file containing all models
 ]
 
 # Get absolute paths
@@ -51,9 +43,10 @@ with st.sidebar:
         st.write(f"**Base directory:** `{base_dir}`")
         st.write(f"**Models directory:** `{models_full_path}`")
         st.write(f"**Models exist:** {models_exist}")
-        st.write(f"**Existing files ({len(existing_files)}):** {', '.join(existing_files) if existing_files else 'None'}")
+        if existing_files:
+            st.write(f"**✅ Found:** {', '.join(existing_files)}")
         if missing_files:
-            st.write(f"**Missing files ({len(missing_files)}):** {', '.join(missing_files)}")
+            st.write(f"**❌ Missing:** {', '.join(missing_files)}")
 
 if not models_exist:
     st.info("🔧 Training models for the first time... This may take a few minutes.")
@@ -102,7 +95,6 @@ if not models_exist:
         
         if training_result.returncode == 0:
             st.success("✅ Models trained successfully!")
-            st.balloons()
             st.info("🔄 The application will reload automatically in 3 seconds...")
             
             # Use HTML meta refresh to reload the page
