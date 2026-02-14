@@ -18,7 +18,10 @@ if not os.path.exists('models/logistic_regression.pkl'):
     st.info("Training models for the first time... This may take a few minutes.")
     subprocess.run(['python', 'src/model_training.py'])
     st.success("Models trained successfully!")
-    st.experimental_rerun()
+    st.info("✅ Please click the button below to load the application.")
+    if st.button("🔄 Refresh Application"):
+        st.rerun()
+    st.stop()  # Stop execution here until user clicks refresh
 
 # Page configuration
 st.set_page_config(
