@@ -1,15 +1,40 @@
 import pickle
 import pandas as pd
 import numpy as np
+import os
 from sklearn.preprocessing import StandardScaler
 
 def load_models():
+    """Load all models from the all_models.pkl file"""
     try:
-        with open('models/all_models.pkl', 'rb') as f:
-            data = pickle.load(f)
-        return data
-    except FileNotFoundError:
-        print("Models not found. Please run model_training.py first.")
+        # Get the directory where this utils.py file is located
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # Go up one level to Assignment2 folder
+        base_dir = os.path.dirname(current_dir)
+        # Build path to models file
+        models_path = os.path.join(base_dir, 'models', 'all_models.pkl')
+        
+        # Try absolute path first
+        if os.path.exists(models_path):
+            with open(models_path, 'rb') as f:
+                data = pickle.load(f)
+            return data
+        
+        # Fallback to relative path
+        relative_path = 'models/all_models.pkl'
+        if os.path.exists(relative_path):
+            with open(relative_path, 'rb') as f:
+                data = pickle.load(f)
+            return data
+            
+        print(f"Models not found at: {models_path} or {relative_path}")
+        return None
+        
+    except FileNotFoundError as e:
+        print(f"FileNotFoundError: Models not found. {e}")
+        return None
+    except Exception as e:
+        print(f"Error loading models: {e}")
         return None
 
 def preprocess_uploaded_data(df, scaler, feature_names):
