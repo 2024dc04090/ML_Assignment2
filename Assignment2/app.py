@@ -459,11 +459,22 @@ def main():
                 unsafe_allow_html=True)
     
     # Load models
-    model_data = load_models()
+    try:
+        model_data = load_models()
+    except Exception as e:
+        st.error(f"Error loading models: {str(e)}")
+        import traceback
+        with st.expander("View Full Error"):
+            st.code(traceback.format_exc())
+        model_data = None
     
     if model_data is None:
         st.error(UI_MESSAGES['models_not_found'])
         st.info(UI_MESSAGES['models_not_found_hint'])
+        
+        # Additional debug
+        st.warning("⚠️ Debug: load_models() returned None even though all_models.pkl exists!")
+        st.info("💡 This likely means your load_models() function in src/utils.py is looking for individual model files instead of all_models.pkl")
         return
     
     models = model_data['models']
