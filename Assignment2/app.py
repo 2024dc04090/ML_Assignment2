@@ -1,3 +1,5 @@
+import os
+import subprocess
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,6 +12,13 @@ from constants import (APP_CONFIG, MODEL_DESCRIPTIONS, METRIC_INFO, METRICS_TO_H
                        TAB_NAMES, SECTION_HEADERS, PREDICTION_LABELS)
 import warnings
 warnings.filterwarnings('ignore')
+
+# Check if models exist
+if not os.path.exists('models/logistic_regression.pkl'):
+    st.info("Training models for the first time... This may take a few minutes.")
+    subprocess.run(['python', 'src/model_training.py'])
+    st.success("Models trained successfully!")
+    st.experimental_rerun()
 
 # Page configuration
 st.set_page_config(
